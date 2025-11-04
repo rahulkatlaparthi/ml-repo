@@ -1,7 +1,9 @@
 $schema: https://azuremlschemas.azureedge.net/latest/environment.schema.json
+
 name: sklearn-custom-env
 description: Environment for logistic regression model training
 
 build:
-  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest  # ✅ Correct key
-  conda_file: conda.yml                                            # ✅ Correct placement
+  dockerfile:
+    image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
+  conda_file: conda.yml
