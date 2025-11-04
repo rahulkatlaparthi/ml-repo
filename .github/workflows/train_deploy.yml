@@ -90,12 +90,9 @@ jobs:
       - name: Deploy model as endpoint
         run: |
           ENDPOINT_NAME=sample-endpoint
-          az ml online-endpoint create --name "$ENDPOINT_NAME" --file pipelines/endpoint.yml --resource-group "$AZURE_RESOURCE_GROUP" --workspace-name "$AZURE_WORKSPACE_NAME" || true
-          az ml online-deployment create \
-            --name blue \
-            --endpoint "$ENDPOINT_NAME" \
-            --model sample-model:1 \
-            --instance-type Standard_DS3_v2 \
-            --instance-count 1 \
-            --resource-group "$AZURE_RESOURCE_GROUP" \
-            --workspace-name "$AZURE_WORKSPACE_NAME"
+          # 1️⃣ Create the endpoint first
+          az ml online-endpoint create --file pipelines/endpoint.yml
+          
+          # 2️⃣ Then create the deployment
+          az ml online-deployment create --file pipelines/deployment.yml --all-traffic
+
