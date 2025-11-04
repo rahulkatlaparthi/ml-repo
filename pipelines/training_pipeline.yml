@@ -8,7 +8,7 @@ experiment_name: sklearn-training-exp
 inputs:
   training_data: 
     type: uri_file
-    path: azureml://datastores/workspaceblobstore/paths/data/training-data.csv
+    path: azureml:sample-data@latest
   regularization: 0.01
 
 outputs:
