@@ -74,9 +74,9 @@ jobs:
             az ml compute create \
               --name $COMPUTE_NAME \
               --type amlcompute \
-              --size Standard_DS3_v2 \
+              --size Standard_E4ds_v4 \
               --min-instances 0 \
-              --max-instances 2 \
+              --max-instances 1 \
               --idle-time-before-scale-down 120 \
               --resource-group $AZURE_RESOURCE_GROUP \
               --workspace-name $AZURE_WORKSPACE_NAME
