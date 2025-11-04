@@ -1,0 +1,61 @@
+name: Train and Deploy Model
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  AZURE_RESOURCE_GROUP: ${{ secrets.AZURE_RESOURCE_GROUP }}
+  AZURE_WORKSPACE_NAME: ${{ secrets.AZURE_ML_WORKSPACE }}
+  AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+
+jobs:
+  build-train-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install azure-ai-ml azure-identity mlflow
+
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Configure Azure ML CLI
+        run: |
+          az extension add -n ml -y
+          az configure --defaults group=${{ env.AZURE_RESOURCE_GROUP }} workspace=${{ env.AZURE_WORKSPACE_NAME }}
+
+      - name: Submit training job
+        run: |
+          az ml job create --file pipelines/training_pipeline.yml --stream
+
+      - name: Register model after training
+        run: |
+          MODEL_PATH="outputs/model.pkl"
+          az ml model create --name sample-model \
+                             --type custom_model \
+                             --path $MODEL_PATH \
+                             --description "Model trained via GitHub Actions"
+
+      - name: Deploy model as endpoint
+        run: |
+          az ml online-endpoint create --name sample-endpoint --file pipelines/endpoint.yml || true
+          az ml online-deployment create --name blue \
+                                         --endpoint sample-endpoint \
+                                         --model sample-model:1 \
+                                         --instance-type Standard_DS3_v2 \
+                                         --instance-count 1
