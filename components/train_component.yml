@@ -3,20 +3,19 @@ name: train_logistic_regression
 display_name: Train Logistic Regression Model
 type: command
 
-code: ../src   # 👈 Folder containing train.py
+code: ../src  # 👈 Folder containing train.py
 
 command: >-
   python train.py
   --data ${{inputs.data}}
   --output ${{outputs.model_output}}
 
-environment: azureml:sklearn-custom-env@latest
-
-
+environment: azureml:sklearn-env:1  # ✅ Use the versioned env you created
 
 inputs:
   data:
     type: uri_file
+
 outputs:
   model_output:
     type: uri_folder
