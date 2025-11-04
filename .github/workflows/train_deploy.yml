@@ -16,114 +16,71 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 0️⃣: Checkout code
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # Step 1️⃣: Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
-      # Step 2️⃣: Install dependencies
       - name: Install dependencies
         run: |
           pip install azure-ai-ml azure-identity mlflow pandas scikit-learn
 
-      # Step 3️⃣: Azure Login (using GitHub Secret AZURE_CREDENTIALS)
       - name: Azure Login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # Step 4️⃣: Add Azure ML extension
       - name: Add Azure ML extension
-        run: |
-          az extension add -n ml -y
+        run: az extension add -n ml -y
 
-      # Step 5️⃣: Ensure ML Workspace exists
       - name: Ensure ML Workspace exists
         run: |
-          if ! az ml workspace show --name $AZURE_WORKSPACE_NAME --resource-group $AZURE_RESOURCE_GROUP >/dev/null 2>&1; then
+          if ! az ml workspace show --name "$AZURE_WORKSPACE_NAME" --resource-group "$AZURE_RESOURCE_GROUP" >/dev/null 2>&1; then
             echo "Creating Azure ML Workspace..."
-            az ml workspace create \
-              --name $AZURE_WORKSPACE_NAME \
-              --resource-group $AZURE_RESOURCE_GROUP \
-              --location $LOCATION
+            az ml workspace create --name "$AZURE_WORKSPACE_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --location "$LOCATION"
           else
             echo "Workspace already exists."
           fi
 
-      # Step 6️⃣: Ensure Compute Cluster exists
       - name: Ensure Compute Cluster exists
         run: |
           COMPUTE_NAME=cpu-cluster
-          if ! az ml compute show --name $COMPUTE_NAME --resource-group $AZURE_RESOURCE_GROUP --workspace-name $AZURE_WORKSPACE_NAME >/dev/null 2>&1; then
+          if ! az ml compute show --name "$COMPUTE_NAME" --resource-group "$AZURE_RESOURCE_GROUP" --workspace-name "$AZURE_WORKSPACE_NAME" >/dev/null 2>&1; then
             echo "Creating Compute Cluster..."
-            az ml compute create \
-              --name $COMPUTE_NAME \
-              --type amlcompute \
-              --size Standard_E4ds_v4 \
-              --min-instances 0 \
-              --max-instances 1 \
-              --idle-time-before-scale-down 120 \
-              --resource-group $AZURE_RESOURCE_GROUP \
-              --workspace-name $AZURE_WORKSPACE_NAME
+            az ml compute create --name "$COMPUTE_NAME" --type amlcompute --size Standard_E4ds_v4 --min-instances 0 --max-instances 1 --idle-time-before-scale-down 120 --resource-group "$AZURE_RESOURCE_GROUP" --workspace-name "$AZURE_WORKSPACE_NAME"
           else
             echo "Compute cluster already exists."
           fi
 
-      # Step 7️⃣: Create sample dataset and upload to Azure ML
       - name: Create and upload sample dataset
         run: |
           mkdir -p data
           cat > data/sample_data.csv <<'CSV_EOF'
-feature1,feature2,feature3,label
-1.2,3.4,5.6,0
-2.3,4.5,6.7,1
-3.1,5.7,8.8,0
-4.2,6.3,9.1,1
-5.0,7.1,10.2,1
-CSV_EOF
+          feature1,feature2,feature3,label
+          1.2,3.4,5.6,0
+          2.3,4.5,6.7,1
+          3.1,5.7,8.8,0
+          4.2,6.3,9.1,1
+          5.0,7.1,10.2,1
+          CSV_EOF
           echo "Sample dataset created at data/sample_data.csv"
+          az ml data create --name sample-data --path data/sample_data.csv --type uri_file --description "Sample dataset uploaded from GitHub Actions" --resource-group "$AZURE_RESOURCE_GROUP" --workspace-name "$AZURE_WORKSPACE_NAME"
 
-          # Upload dataset to Azure ML datastore (will register as version 1)
-          az ml data create \
-            --name sample-data \
-            --path data/sample_data.csv \
-            --type uri_file \
-            --description "Sample dataset uploaded from GitHub Actions" \
-            --resource-group $AZURE_RESOURCE_GROUP \
-            --workspace-name $AZURE_WORKSPACE_NAME
-
-      # Step 8️⃣: Submit Training Job
       - name: Submit training pipeline job
         run: |
-          az configure --defaults group=${{ env.AZURE_RESOURCE_GROUP }} workspace=${{ env.AZURE_WORKSPACE_NAME }}
+          az configure --defaults group="$AZURE_RESOURCE_GROUP" workspace="$AZURE_WORKSPACE_NAME"
           az ml job create --file pipelines/training_pipeline.yml --stream
 
-      # Step 9️⃣: Register Model
       - name: Register model
         run: |
           MODEL_PATH="outputs/model.pkl"
-          az ml model create --name sample-model \
-                             --type custom_model \
-                             --path $MODEL_PATH \
-                             --description "Model trained via GitHub Actions" \
-                             --resource-group $AZURE_RESOURCE_GROUP \
-                             --workspace-name $AZURE_WORKSPACE_NAME
+          az ml model create --name sample-model --type custom_model --path "$MODEL_PATH" --description "Model trained via GitHub Actions" --resource-group "$AZURE_RESOURCE_GROUP" --workspace-name "$AZURE_WORKSPACE_NAME"
 
-      # Step 🔟: Deploy Model as Endpoint
       - name: Deploy model as endpoint
         run: |
           ENDPOINT_NAME=sample-endpoint
-          az ml online-endpoint create --name $ENDPOINT_NAME --file pipelines/endpoint.yml --resource-group $AZURE_RESOURCE_GROUP --workspace-name $AZURE_WORKSPACE_NAME || true
-          az ml online-deployment create \
-              --name blue \
-              --endpoint $ENDPOINT_NAME \
-              --model sample-model:1 \
-              --instance-type Standard_DS3_v2 \
-              --instance-count 1 \
-              --resource-group $AZURE_RESOURCE_GROUP \
-              --workspace-name $AZURE_WORKSPACE_NAME
+          az ml online-endpoint create --name "$ENDPOINT_NAME" --file pipelines/endpoint.yml --resource-group "$AZURE_RESOURCE_GROUP" --workspace-name "$AZURE_WORKSPACE_NAME" || true
+          az ml online-deployment create --name blue --endpoint "$ENDPOINT_NAME" --model sample-model:1 --instance-type Standard_DS3_v2 --instance-count 1 --resource-group "$AZURE_RESOURCE_GROUP" --workspace-name "$AZURE_WORKSPACE_NAME"
