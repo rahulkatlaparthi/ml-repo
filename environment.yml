@@ -1,8 +1,20 @@
-name: azure-ml-env
-dependencies:
-  - python=3.10
-  - pip:
+$schema: https://azuremlschemas.azureedge.net/latest/environment.schema.json
+name: sklearn-custom-env
+version: 1
+description: Custom environment with Python 3.10 and scikit-learn for training
+build:
+  path: .
+conda_file:
+  name: sklearn-env
+  channels:
+    - defaults
+  dependencies:
+    - python=3.10
     - scikit-learn
     - pandas
     - numpy
-    - joblib
+    - pip
+    - pip:
+        - joblib
+        - azure-ai-ml
+        - mlflow
