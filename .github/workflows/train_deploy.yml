@@ -69,10 +69,10 @@ jobs:
           echo "Sample dataset created at data/sample_data.csv"
           az ml data create --name sample-data --path data/sample_data.csv --type uri_file --description "Sample dataset uploaded from GitHub Actions" --resource-group "$AZURE_RESOURCE_GROUP" --workspace-name "$AZURE_WORKSPACE_NAME"
 
-      - name: Submit training pipeline job
-        run: |
-          az configure --defaults group="$AZURE_RESOURCE_GROUP" workspace="$AZURE_WORKSPACE_NAME"
-          az ml job create --file pipelines/training_pipeline.yml --stream
+      # - name: Submit training pipeline job
+      #   run: |
+      #     az configure --defaults group="$AZURE_RESOURCE_GROUP" workspace="$AZURE_WORKSPACE_NAME"
+      #     az ml job create --file pipelines/training_pipeline.yml --stream
 
       - name: Register model
         run: |
