@@ -10,7 +10,8 @@ command: >-
   --data ${{inputs.data}}
   --output ${{outputs.model_output}}
 
-environment: azureml:AzureML-sklearn-1.3-ubuntu20.04-py310-cpu@latest
+environment: azureml:AzureML-minimal-ubuntu22.04-py310-cpu@latest
+
 
 inputs:
   data:
