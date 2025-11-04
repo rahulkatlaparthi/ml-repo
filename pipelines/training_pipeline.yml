@@ -1,0 +1,21 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+description: Training pipeline for sample ML model
+
+settings:
+  default_compute: azureml:cpu-cluster
+
+jobs:
+  train_job:
+    type: command
+    display_name: Train Model
+    command: >-
+      python src/train.py --data inputs/data.csv --output outputs/model.pkl
+    environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
+    inputs:
+      data:
+        type: uri_file
+        path: azureml://datastores/workspaceblobstore/paths/data/train.csv
+    outputs:
+      model_output:
+        mode: rw_mount
