@@ -1,0 +1,8 @@
+name: azure-ml-env
+dependencies:
+  - python=3.10
+  - pip:
+    - scikit-learn
+    - pandas
+    - numpy
+    - joblib
