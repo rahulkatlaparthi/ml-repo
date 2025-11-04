@@ -3,7 +3,7 @@ name: train_logistic_regression
 display_name: Train Logistic Regression Model
 type: command
 
-code: ./src   # 👈 Folder containing train.py
+code: ../src   # 👈 Folder containing train.py
 
 command: >-
   python train.py
