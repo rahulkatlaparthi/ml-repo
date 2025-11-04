@@ -43,14 +43,14 @@ jobs:
           az extension add -n ml -y
 
       # Step 5️⃣: Ensure Resource Group exists
-      - name: Ensure Resource Group exists
-        run: |
-          if ! az group show --name $AZURE_RESOURCE_GROUP >/dev/null 2>&1; then
-            echo "Creating Resource Group..."
-            az group create --name $AZURE_RESOURCE_GROUP --location $LOCATION
-          else
-            echo "Resource Group already exists."
-          fi
+      # - name: Ensure Resource Group exists
+      #   run: |
+      #     if ! az group show --name $AZURE_RESOURCE_GROUP >/dev/null 2>&1; then
+      #       echo "Creating Resource Group..."
+      #       az group create --name $AZURE_RESOURCE_GROUP --location $LOCATION
+      #     else
+      #       echo "Resource Group already exists."
+      #     fi
 
       # Step 6️⃣: Ensure ML Workspace exists
       - name: Ensure ML Workspace exists
