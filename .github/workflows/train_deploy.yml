@@ -26,7 +26,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install azure-ai-ml azure-identity mlflow pandas scikit-learn
+          pip install azure-ai-ml azure-identity mlflow pandas scikit-learn joblib
 
       - name: Azure Login
         uses: azure/login@v2
@@ -59,7 +59,7 @@ jobs:
         run: |
           mkdir -p data
           cat > data/sample_data.csv <<'CSV_EOF'
-          feature1,feature2,feature3,label
+          feature1,feature2,feature3,target
           1.2,3.4,5.6,0
           2.3,4.5,6.7,1
           3.1,5.7,8.8,0
@@ -69,24 +69,31 @@ jobs:
           echo "Sample dataset created at data/sample_data.csv"
           az ml data create --name sample-data --path data/sample_data.csv --type uri_file --description "Sample dataset uploaded from GitHub Actions" --resource-group "$AZURE_RESOURCE_GROUP" --workspace-name "$AZURE_WORKSPACE_NAME"
 
-      # - name: Submit training pipeline job
-      #   run: |
-      #     az configure --defaults group="$AZURE_RESOURCE_GROUP" workspace="$AZURE_WORKSPACE_NAME"
-      #     az ml job create --file pipelines/training_pipeline.yml --stream
+      - name: Submit training pipeline job
+        run: |
+          az configure --defaults group="$AZURE_RESOURCE_GROUP" workspace="$AZURE_WORKSPACE_NAME"
+          az ml job create --file pipelines/training_pipeline.yml --stream
 
       - name: Register model from pipeline output
         run: |
           PIPELINE_RUN_ID=$(az ml job list --query "[0].name" -o tsv)
+          echo "Registering model from pipeline output of job: $PIPELINE_RUN_ID"
           az ml model create \
-            --name my-model \
+            --name sample-model \
             --path "azureml://jobs/$PIPELINE_RUN_ID/outputs/model_output" \
             --type custom_model \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --workspace-name ${{ env.AZURE_WORKSPACE_NAME }}
-
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --workspace-name "$AZURE_WORKSPACE_NAME"
 
       - name: Deploy model as endpoint
         run: |
           ENDPOINT_NAME=sample-endpoint
           az ml online-endpoint create --name "$ENDPOINT_NAME" --file pipelines/endpoint.yml --resource-group "$AZURE_RESOURCE_GROUP" --workspace-name "$AZURE_WORKSPACE_NAME" || true
-          az ml online-deployment create --name blue --endpoint "$ENDPOINT_NAME" --model sample-model:1 --instance-type Standard_DS3_v2 --instance-count 1 --resource-group "$AZURE_RESOURCE_GROUP" --workspace-name "$AZURE_WORKSPACE_NAME"
+          az ml online-deployment create \
+            --name blue \
+            --endpoint "$ENDPOINT_NAME" \
+            --model sample-model:1 \
+            --instance-type Standard_DS3_v2 \
+            --instance-count 1 \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
+            --workspace-name "$AZURE_WORKSPACE_NAME"
