@@ -1,24 +1,26 @@
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
-description: Training pipeline for logistic regression
+description: Sklearn training pipeline.
 
-display_name: train_pipeline
-experiment_name: sample-train-exp
+display_name: sklearn-training-pipeline
+experiment_name: sklearn-training-exp
 
 inputs:
-  input_data:
+  training_data: 
     type: uri_file
-    path: azureml:sample-data@latest
+    path: azureml://datastores/workspaceblobstore/paths/data/training-data.csv
+  regularization: 0.01
 
 outputs:
   model_output:
-    type: uri_folder
+    mode: rw_mount
 
 jobs:
   train_job:
-    component: ../components/train_component.yml   # ✅ correct relative path
+    type: command
+    component: azureml:train_component:1  # ✅ after you upload the component in UI
     inputs:
-      data: ${{parent.inputs.input_data}}
+      training_data: ${{parent.inputs.training_data}}
+      regularization: ${{parent.inputs.regularization}}
     outputs:
       model_output: ${{parent.outputs.model_output}}
-    compute: azureml:cpu-cluster
