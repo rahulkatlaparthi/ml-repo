@@ -1,9 +1,11 @@
-name: sklearn-env
+name: sklearn-conda-env
+channels:
+  - conda-forge
 dependencies:
   - python=3.10
   - scikit-learn
   - pandas
-  - numpy
+  - joblib
   - pip
   - pip:
-      - mlflow
+      - azureml-defaults
