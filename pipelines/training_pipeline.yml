@@ -10,7 +10,7 @@ jobs:
     type: command
     display_name: Train Model
     command: >-
-      python src/train.py --data inputs/data.csv --output outputs/model.pkl
+      python src/train.py --data ${{inputs.data}} --output ${{outputs.model_output}}
     environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
     inputs:
       data:
@@ -18,4 +18,5 @@ jobs:
         path: azureml://datastores/workspaceblobstore/paths/data/train.csv
     outputs:
       model_output:
+        type: uri_folder
         mode: rw_mount
