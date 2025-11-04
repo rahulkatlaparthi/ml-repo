@@ -1,21 +1,26 @@
 $schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
-name: train_logistic_regression
-display_name: Train Logistic Regression Model
+name: train_component
+display_name: Train Model Component
 type: command
-
-code: ../src  # 👈 Folder containing train.py
-
-command: >-
-  python train.py
-  --data ${{inputs.data}}
-  --output ${{outputs.model_output}}
-
-environment: azureml:sklearn-env:1  # ✅ Use the versioned env you created
+description: Train a simple sklearn model.
 
 inputs:
-  data:
+  training_data:
     type: uri_file
+  regularization:
+    type: number
+    default: 0.01
 
 outputs:
   model_output:
     type: uri_folder
+
+# ✅ Use your existing environment here
+environment: azureml:sklearn-env:1
+
+code: ../src
+command: >-
+  python train.py
+  --training_data ${{inputs.training_data}}
+  --regularization ${{inputs.regularization}}
+  --model_output ${{outputs.model_output}}
