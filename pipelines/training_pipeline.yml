@@ -1,36 +1,31 @@
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
-description: "Training pipeline with inline component"
+description: Training pipeline for logistic regression
+
+display_name: train_pipeline
+experiment_name: sample-train-exp
 
 inputs:
   input_data:
     type: uri_file
-    path: azureml://datastores/workspaceblobstore/paths/LocalUpload/f9855dded73af9327c3dbc1f9a64c774aba12508018ff3ad9e554690660ca3b1/sample_data.csv
+    path: azureml:sample-data@latest
 
 outputs:
   model_output:
     type: uri_folder
 
-settings:
-  default_compute: azureml:cpu-cluster
-
 jobs:
   train_job:
-    component:
-      name: train_component
-      display_name: Train Logistic Regression Model
-      type: command
-      code: ./src
-      command: >-
-        python train.py --data ${{inputs.data}} --output ${{outputs.model_output}}
-      environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
-      inputs:
-        data:
-          type: uri_file
-      outputs:
-        model_output:
-          type: uri_folder
+    type: command
+    display_name: Train Logistic Regression Model
+    code: ./src               # 👈 Ensure this folder exists with train.py inside
+    command: >-
+      python train.py
+      --data ${{inputs.data}}
+      --output ${{outputs.model_output}}
+    environment: azureml:AzureML-sklearn-1.3-ubuntu20.04-py310-cpu@latest
     inputs:
       data: ${{parent.inputs.input_data}}
     outputs:
       model_output: ${{parent.outputs.model_output}}
+    compute: azureml:cpu-cluster
