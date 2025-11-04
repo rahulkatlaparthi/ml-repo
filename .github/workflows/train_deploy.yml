@@ -72,6 +72,7 @@ jobs:
       - name: Submit training pipeline job
         run: |
           az configure --defaults group="$AZURE_RESOURCE_GROUP" workspace="$AZURE_WORKSPACE_NAME"
+          az ml environment create --file environment.yml
           az ml job create --file pipelines/training_pipeline.yml --stream
 
       - name: Register model from pipeline output
