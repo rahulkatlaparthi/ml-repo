@@ -16,9 +16,7 @@ outputs:
 
 jobs:
   train_job:
-    type: command
-    component: component: ../components/train_component.yml
-   # 👈 Reference the command component file
+    component: ../components/train_component.yml   # 👈 path to your component file
     inputs:
       data: ${{parent.inputs.input_data}}
     outputs:
