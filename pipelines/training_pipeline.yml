@@ -9,10 +9,10 @@ jobs:
   train_job:
     type: command
     display_name: Train Model
+    code: ./src
     command: >-
-      python src/train.py --data ${{inputs.data}} --output ${{outputs.model_output}}/model.pkl
+      python train.py --data ${{inputs.data}} --output ${{outputs.model_output}}/model.pkl
     environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
-
     inputs:
       data:
         type: uri_file
