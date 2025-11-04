@@ -74,10 +74,16 @@ jobs:
       #     az configure --defaults group="$AZURE_RESOURCE_GROUP" workspace="$AZURE_WORKSPACE_NAME"
       #     az ml job create --file pipelines/training_pipeline.yml --stream
 
-      - name: Register model
+      - name: Register model from pipeline output
         run: |
-          MODEL_PATH="outputs/model.pkl"
-          az ml model create --name sample-model --type custom_model --path "$MODEL_PATH" --description "Model trained via GitHub Actions" --resource-group "$AZURE_RESOURCE_GROUP" --workspace-name "$AZURE_WORKSPACE_NAME"
+          PIPELINE_RUN_ID=$(az ml job list --query "[0].name" -o tsv)
+          az ml model create \
+            --name my-model \
+            --path "azureml://jobs/$PIPELINE_RUN_ID/outputs/model_output" \
+            --type custom_model \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --workspace-name ${{ env.AZURE_WORKSPACE_NAME }}
+
 
       - name: Deploy model as endpoint
         run: |
