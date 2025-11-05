@@ -8,7 +8,6 @@ conda_file:
     - python=3.10
     - pip
     - pip:
-        - numpy==2.2.6
         - scikit-learn==1.7.2
         - joblib
         - azureml-inference-server-http
