@@ -98,4 +98,9 @@ jobs:
           
           # # 2️⃣ Then create the deployment
           # az ml online-deployment create --file pipelines/deployment.yml --all-traffic
+          az ml online-deployment update \
+          --name blue \
+          --endpoint sample-endpoint \
+          --file pipelines/deployment.yml
+
 
