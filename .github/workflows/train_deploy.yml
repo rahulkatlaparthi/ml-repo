@@ -90,11 +90,12 @@ jobs:
       - name: Deploy model as endpoint
         run: |
           ENDPOINT_NAME=sample-endpoint
-          az ml online-endpoint delete --name sample-endpoint --yes
+          az ml model show -n sample-model -v 8 --query path -o tsv
+          # az ml online-endpoint delete --name sample-endpoint --yes
 
-          # 1️⃣ Create the endpoint first
-          az ml online-endpoint create --file pipelines/endpoint.yml
+          # # 1️⃣ Create the endpoint first
+          # az ml online-endpoint create --file pipelines/endpoint.yml
           
-          # 2️⃣ Then create the deployment
-          az ml online-deployment create --file pipelines/deployment.yml --all-traffic
+          # # 2️⃣ Then create the deployment
+          # az ml online-deployment create --file pipelines/deployment.yml --all-traffic
 
