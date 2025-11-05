@@ -90,17 +90,27 @@ jobs:
       - name: Deploy model as endpoint
         run: |
           ENDPOINT_NAME=sample-endpoint
-          az ml model show -n sample-model -v 8 --query path -o tsv
-          # az ml online-endpoint delete --name sample-endpoint --yes
-
-          # # 1️⃣ Create the endpoint first
-          # az ml online-endpoint create --file pipelines/endpoint.yml
-          
-          # # 2️⃣ Then create the deployment
-          # az ml online-deployment create --file pipelines/deployment.yml --all-traffic
-          az ml online-deployment update \
-          --name blue \
-          --endpoint sample-endpoint \
-          --file pipelines/deployment.yml
-
-
+      
+          # Create endpoint if not exists
+          if ! az ml online-endpoint show --name $ENDPOINT_NAME >/dev/null 2>&1; then
+            echo "Creating endpoint..."
+            az ml online-endpoint create --file pipelines/endpoint.yml
+          else
+            echo "Endpoint already exists."
+          fi
+      
+          # Create or update deployment
+          if ! az ml online-deployment show --name blue --endpoint-name $ENDPOINT_NAME >/dev/null 2>&1; then
+            echo "Creating new deployment..."
+            az ml online-deployment create \
+              --name blue \
+              --endpoint-name $ENDPOINT_NAME \
+              --file pipelines/deployment.yml \
+              --all-traffic
+          else
+            echo "Updating existing deployment..."
+            az ml online-deployment update \
+              --name blue \
+              --endpoint-name $ENDPOINT_NAME \
+              --file pipelines/deployment.yml
+          fi
