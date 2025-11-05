@@ -1,11 +1,13 @@
-name: sklearn-env
-dependencies:
-  - python=3.10
-  - scikit-learn
-  - pandas
-  - numpy
-  - pip
-  - pip:
-      - azureml-core
-      - joblib
-      - azureml-dataprep[pandas]
+$schema: https://azuremlschemas.azureedge.net/latest/environment.schema.json
+name: sklearn-custom-env
+build:
+  dockerfile:
+    base_image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
+conda_file:
+  dependencies:
+    - python=3.8
+    - scikit-learn==1.2.2   # <-- use the version from your machine
+    - numpy==1.26.0         # <-- match your model's numpy version
+    - pip:
+        - joblib
+        - azureml-inference-server-http
