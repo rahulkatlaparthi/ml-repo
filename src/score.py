@@ -5,10 +5,29 @@ import os
 
 def init():
     global model
-    model_path = os.path.join(os.getenv("AZUREML_MODEL_DIR"), "model.joblib")
+
+    # Root directory where Azure places your model
+    model_dir = os.getenv("AZUREML_MODEL_DIR")
+
+    # ✅ Your model is inside model_output/model.joblib (not directly at root)
+    model_path = os.path.join(model_dir, "model_output", "model.joblib")
+
+    # Load model
     model = joblib.load(model_path)
+    print(f"✅ Model loaded from: {model_path}")
 
 def run(raw_data):
-    data = np.array(json.loads(raw_data)["data"])
-    preds = model.predict(data)
-    return json.dumps({"predictions": preds.tolist()})
+    try:
+        # Parse input JSON
+        data = json.loads(raw_data)
+        input_array = np.array(data["data"])
+
+        # Predict
+        preds = model.predict(input_array)
+
+        # Return predictions in JSON
+        return json.dumps({"predictions": preds.tolist()})
+
+    except Exception as e:
+        # Return readable error message to endpoint clients
+        return json.dumps({"error": str(e)})
