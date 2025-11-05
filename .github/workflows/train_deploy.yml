@@ -90,16 +90,16 @@ jobs:
         run: |
           python -c "import numpy, sklearn; print('numpy:', numpy.__version__); print('scikit-learn:', sklearn.__version__)"
 
-      - name: Check Python package versions (safe)
-        run: |
-          python - << 'EOF'
-          from importlib import metadata
-          for pkg in ["numpy", "scikit-learn"]:
-              try:
-                  print(pkg, metadata.version(pkg))
-              except:
-                  print(pkg, "not installed")
-            EOF
+      # - name: Check Python package versions (safe)
+      #   run: |
+      #     python - << 'EOF'
+      #     from importlib import metadata
+      #     for pkg in ["numpy", "scikit-learn"]:
+      #         try:
+      #             print(pkg, metadata.version(pkg))
+      #         except:
+      #             print(pkg, "not installed")
+      #       EOF
       
 
 
