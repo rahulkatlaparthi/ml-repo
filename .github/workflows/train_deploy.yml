@@ -109,6 +109,11 @@ jobs:
               --all-traffic
           else
             echo "Updating existing deployment..."
+            az ml online-deployment get-logs \
+            --name blue \
+            --endpoint-name sample-endpoint \
+            --lines 200
+
             az ml online-deployment update \
               --name blue \
               --endpoint-name $ENDPOINT_NAME \
