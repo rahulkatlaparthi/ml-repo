@@ -1,11 +1,11 @@
-name: sklearn-conda-env
+name: sklearn-custom-env
 channels:
   - conda-forge
 dependencies:
-  - python=3.10
-  - scikit-learn
-  - pandas
-  - joblib
+  - python=3.8
+  - numpy=<YOUR_VERSION_HERE>
+  - scikit-learn=<YOUR_VERSION_HERE>
   - pip
   - pip:
-      - azureml-defaults
+      - joblib
+      - azureml-inference-server-http
