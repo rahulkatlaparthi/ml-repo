@@ -2,9 +2,9 @@ name: sklearn-custom-env
 channels:
   - conda-forge
 dependencies:
-  - python=3.8
-  - numpy=<YOUR_VERSION_HERE>
-  - scikit-learn=<YOUR_VERSION_HERE>
+  - python=3.10   # sklearn 1.7+ requires Python ≥3.9
+  - numpy=2.2.6
+  - scikit-learn=1.7.2
   - pip
   - pip:
       - joblib
