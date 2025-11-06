@@ -2,7 +2,8 @@ $schema: https://azuremlschemas.azureedge.net/latest/managedOnlineDeployment.sch
 name: blue
 endpoint_name: sample-endpoint
 model: azureml:sample-model:8
-environment: azureml:sklearn-custom-env@latest
+environment:
+  file: ../environment.yml
 code_configuration:
   code: ../src
   scoring_script: score.py
